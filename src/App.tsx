@@ -1,31 +1,39 @@
 // import { useState } from 'react';
 // import reactLogo from './assets/react.svg'
 // import viteLogo from '/vite.svg'
-import { useRef, useState } from 'react';
+// import { useRef, useState } from 'react';
+import { useEffect } from 'react';
 import './App.css';
 
+import Hls from 'hls.js';
+
 function App() {
-    // const [count, setCount] = useState(0)
-    const [content, setContent] = useState('');
-    const container = useRef<HTMLDivElement>(null);
+    useEffect(() => {
+        const video: HTMLVideoElement = document.getElementById('video') as HTMLVideoElement;
+        const videoSrc = 'https://yacshy.github.io/izu/video/index.m3u8';
 
-    const getinfo = () => {
-        fetch('https://yacshy.github.io')
-            .then((res) => res.json())
-            .then((res: string) => {
-                setContent(res);
-                console.log(content);
-                if (container.current) {
-                    container.current.innerHTML = res;
-                }
-            });
-    };
-
-    getinfo();
-
+        if (!video) {
+            return;
+        }
+        //
+        // First check for native browser HLS support
+        //
+        if (video.canPlayType('application/vnd.apple.mpegurl')) {
+            video.src = videoSrc;
+            //
+            // If no native HLS support, check if HLS.js is supported
+            //
+        } else if (Hls.isSupported()) {
+            const hls = new Hls();
+            hls.loadSource(videoSrc);
+            hls.attachMedia(video);
+        }
+    }, []);
     return (
         <>
-            <div className="text-3xl font-bold underline bg-red-600 text-white" ref={container}></div>
+            <div className="fuck">
+                <video id="video" muted autoPlay controls></video>
+            </div>
         </>
     );
 }
